@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ready-Dresser</title>
+  <style>
+    :root {
+      --bg-color: #f7f1ff;
+      --text-color: #4a148c;
+      --card-bg: white;
+    }
+
+    body.dark {
+      --bg-color: #1e1e2f;
+      --text-color: #e0d7f7;
+      --card-bg: #2e2e3f;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--bg-color);
+      color: var(--text-color);
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2.6rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .description {
+      text-align: center;
+      font-size: 1rem;
+      margin-bottom: 30px;
+      opacity: 0.8;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-top: 15px;
+    }
+
+    input[type="text"],
+    select {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #7e57c2;
+      border-radius: 8px;
+      margin-top: 6px;
+      font-size: 1rem;
+    }
+
+    input[type="file"] {
+      margin-top: 10px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #512da8;
+      color: white;
+      font-weight: 700;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 8px;
+      margin-top: 20px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #311b92;
+    }
+
+    .clothes-list {
+      margin-top: 30px;
+    }
+
+    .clothes-item {
+      background: var(--card-bg);
+      display: flex;
+      align-items: center;
+      padding: 10px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .clothes-item img {
+      width: 70px;
+      height: 70px;
+      border-radius: 10px;
+      object-fit: cover;
+      margin-right: 15px;
+    }
+
+    .btn-remove {
+      margin-left: auto;
+      background: #d32f2f;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 6px 12px;
+      cursor: pointer;
+    }
+
+    .suggestion {
+      margin-top: 30px;
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    .suggestion img {
+      width: 100px;
+      height: 100px;
+      margin-top: 10px;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+
+    /* Dark mode toggle */
+    .dark-mode-toggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dark-mode-toggle input[type="checkbox"] {
+      width: 40px;
+      height: 20px;
+      cursor: pointer;
+    }
+
+    /* Login overlay */
+    #loginOverlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #fff;
+      z-index: 9999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    #loginOverlay input {
+      padding: 10px;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 2px solid #7e57c2;
+      margin-bottom: 10px;
+      width: 250px;
+    }
+
+    #loginOverlay button {
+      width: 250px;
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<!-- Login Overlay -->
+<div id="loginOverlay">
+  <h2>Enter Access Code</h2>
+  <input type="password" id="accessCode" placeholder="Enter code..." />
+  <button onclick="checkLogin()">Unlock</button>
+</div>
+
+<!-- Dark Mode Toggle -->
+<div class="dark-mode-toggle">
+  <label for="darkModeToggle">Dark Mode</label>
+  <input type="checkbox" id="darkModeToggle" />
+</div>
+
+<h1>Ready-Dresser</h1>
+<div class="description">Upload your wardrobe and get outfit suggestions based on the weather!</div>
+
+<label for="itemName">Clothing Item Name:</label>
+<input type="text" id="itemName" placeholder="e.g. Blue Jumper" />
+
+<label for="itemCategory">Category:</label>
+<select id="itemCategory">
+  <option value="">Select category</option>
+  <option>T-shirt</option>
+  <option>Trousers</option>
+  <option>shorts</option>
+  <option>Jumper</option>
+  <option>Shoes</option>
+  <option>Socks</option>
+  <option>Underwear</option>
+  <option>Hat</option>
+  <option>Scarf</option>
+  <option>Gloves</option>
+  <option>Belt</option>
+  <option>Dress</option>
+  <option>Skirt</option>
+  <option>Shorts</option>
+  <option>Swimwear</option>
+  <option>Accessories</option>
+</select>
+
+<label for="itemPhoto">Choose Photo:</label>
+<input type="file" id="itemPhoto" accept="image/*" />
+
+<button id="addItemBtn">Add Clothing Item</button>
+
+<div class="clothes-list" id="clothesList"></div>
+
+<label for="weatherInput" style="margin-top:30px;">Select Today's Weather:</label>
+<select id="weatherInput">
+  <option value="">Select weather</option>
+  <option>Sunny</option>
+  <option>Rainy</option>
+  <option>Cold</option>
+  <option>Hot</option>
+  <option>Cloudy</option>
+</select>
+
+<button id="suggestBtn">Suggest Outfit</button>
+<div class="suggestion" id="suggestionBox" style="display:none;"></div>
+
+<!-- Virtual Closet Mirror -->
+<h2 style="text-align:center; margin-top: 40px;">Virtual Closet Mirror</h2>
+<div id="closetMirror" style="
+  position: relative;
+  width: 300px;
+  height: 450px;
+  margin: 20px auto;
+  border: 2px solid #7e57c2;
+  border-radius: 15px;
+  background: #fafafa;
+  box-shadow: 0 0 12px rgba(126, 87, 194, 0.3);
+  overflow: hidden;
+">
+  <!-- Silhouette or background image can be added here -->
+</div>
+<p style="text-align:center; font-size: 0.9rem; opacity: 0.7;">Drag clothes items below onto the mirror</p>
+
+<script>
+  const clothesList = document.getElementById('clothesList');
+  const suggestionBox = document.getElementById('suggestionBox');
+
+  let wardrobe = JSON.parse(localStorage.getItem('wardrobe')) || [];
+
+  function saveWardrobe() {
+    localStorage.setItem('wardrobe', JSON.stringify(wardrobe));
+  }
+
+  // Drag & Drop: track dragged item index
+  let draggedIndex = null;
+
+  // Drag start handler for clothes items
+  function dragStart(event, index) {
+    draggedIndex = index;
+    event.dataTransfer.effectAllowed = "move";
+  }
+
+  // Modified renderWardrobe with draggable attribute and dragstart event
+  function renderWardrobe() {
+    if (wardrobe.length === 0) {
+      clothesList.innerHTML = "<p>No clothes added yet.</p>";
+      return;
+    }
+    clothesList.innerHTML = '';
+    wardrobe.forEach((item, index) => {
+      clothesList.innerHTML += `
+        <div class="clothes-item" draggable="true" ondragstart="dragStart(event, ${index})">
+          <img src="${item.photo}" alt="${item.name}" />
+          <div>
+            <strong>${item.name}</strong><br />
+            <small>${item.category}</small>
+          </div>
+          <button class="btn-remove" onclick="removeItem(${index})">Remove</button>
+        </div>`;
+    });
+    suggestionBox.style.display = 'none';
+  }
+
+  function removeItem(index) {
+    wardrobe.splice(index, 1);
+    saveWardrobe();
+    renderWardrobe();
+    suggestionBox.style.display = 'none';
+  }
+
+  function pickRandom(arr) {
+    if (arr.length === 0) return null;
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+
+  const weatherCategoryPreference = {
+    Rainy: ['Jumper', 'Outerwear', 'Shoes', 'Socks', 'Hat', 'Gloves'],
+    Cold: ['Jumper', 'Outerwear', 'Hat', 'Gloves', 'Scarf', 'Bottom', 'Shoes'],
+    Hot: ['Top', 'Shorts', 'Swimwear', 'Shoes'],
+    Sunny: ['Top', 'Bottom', 'Shoes', 'Accessories', 'Socks'],
+    Cloudy: ['Top', 'Jumper', 'Bottom', 'Shoes']
+  };
+
+  document.getElementById('addItemBtn').addEventListener('click', () => {
+    const name = document.getElementById('itemName').value.trim();
+    const category = document.getElementById('itemCategory').value;
+    const photoInput = document.getElementById('itemPhoto');
+
+    if (!name || !category || !photoInput.files.length) {
+      alert("Please fill all fields and select a photo.");
+      return;
+    }
+
+    const file = photoInput.files[0];
+    const reader = new FileReader();
+    reader.onload = () => {
+      wardrobe.push({ name, category, photo: reader.result });
+      saveWardrobe();
+      renderWardrobe();
+      document.getElementById('itemName').value = '';
+      document.getElementById('itemCategory').value = '';
+      photoInput.value = '';
+      suggestionBox.style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  });
+
+  document.getElementById('suggestBtn').addEventListener('click', () => {
+    const weather = document.getElementById('weatherInput').value;
+    if (!weather) {
+      alert("Please select the weather.");
+      return;
+    }
+
+    const preferredCategories = weatherCategoryPreference[weather] || [];
+    let suggestionHTML = `<div>Based on <strong>${weather}</strong> weather, try this:</div><br>`;
+    let foundAny = false;
+
+    preferredCategories.forEach(cat => {
+      const matches = wardrobe.filter(item => item.category === cat);
+      const pick = pickRandom(matches);
+      if (pick) {
+        foundAny = true;
+        suggestionHTML += `
+          <div><strong>${cat}:</strong> ${pick.name}<br />
+          <img src="${pick.photo}" alt="${pick.name}" /></div><br>`;
+      }
+    });
+
+    if (!foundAny) {
+      suggestionHTML = "No matching clothes found for this weather.";
+    }
+
+    suggestionBox.innerHTML = suggestionHTML;
+    suggestionBox.style.display = 'block';
+  });
+
+  // Dark mode toggle
+  document.getElementById('darkModeToggle').addEventListener('change', (e) => {
+    document.body.classList.toggle('dark', e.target.checked);
+  });
+
+  // Login check
+  function checkLogin() {
+    const inputCode = document.getElementById('accessCode').value;
+    if (inputCode === 'alexJacob12345') {
+      document.getElementById('loginOverlay').style.display = 'none';
+    } else {
+      alert('Incorrect code. Try again.');
+    }
+  }
+
+  // Virtual Closet Mirror drag & drop handlers
+  const closetMirror = document.getElementById('closetMirror');
+  closetMirror.addEventListener('dragover', e => e.preventDefault());
+
+  closetMirror.addEventListener('drop', e => {
+    e.preventDefault();
+    if (draggedIndex === null) return;
+
+    const item = wardrobe[draggedIndex];
+
+    // Remove existing item of the same category from mirror
+    const existing = closetMirror.querySelector(`img[data-category="${item.category}"]`);
+    if (existing) closetMirror.removeChild(existing);
+
+    // Create image for dropped clothing item
+    const img = document.createElement('img');
+    img.src = item.photo;
+    img.alt = item.name;
+    img.title = item.name;
+
+    img.style.position = 'absolute';
+    img.style.width = '120px';
+    img.style.borderRadius = '10px';
+    img.style.left = '90px'; // horizontal position on mirror
+    img.style.top = getPositionForCategory(item.category);
+    img.style.cursor = 'pointer';
+
+    img.setAttribute('data-category', item.category);
+
+    // Click image to remove from mirror
+    img.addEventListener('click', () => closetMirror.removeChild(img));
+
+    closetMirror.appendChild(img);
+  });
+
+  function getPositionForCategory(category) {
+    const positions = {
+      'T-shirt': '120px',
+      'Jumper': '120px',
+      'Top': '120px',
+      'Dress': '110px',
+      'Skirt': '250px',
+      'Trousers': '250px',
+      'shorts': '250px',
+      'Shoes': '400px',
+      'Socks': '380px',
+      'Hat': '20px',
+      'Scarf': '60px',
+      'Gloves': '60px',
+      'Accessories': '50px',
+      'Swimwear': '120px',
+      'Underwear': '150px',
+      'Belt': '230px',
+    };
+    return positions[category] || '200px';
+  }
+
+  // Initial rendering of wardrobe
+  renderWardrobe();
+</script>
+</body>
+</html>
